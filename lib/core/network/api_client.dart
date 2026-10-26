@@ -23,7 +23,7 @@ class ApiClient {
         .add(InterceptorsWrapper(onRequest: (options, handler) async {
       final token = await TokenStorage.instance.getAccessToken();
       if (token != null && token.isNotEmpty) {
-        options.headers["authorization"] = "Bearer ${token}";
+        options.headers["Authorization"] = "Bearer ${token}";
       }
       return handler.next(options);
     }, onError: (DioException e, handler) {
