@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:manage_intern/core/network/api_client.dart';
 import 'package:manage_intern/core/storage/token_storage.dart';
@@ -13,11 +14,13 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isAuthenticated = false;
+  String? _errorCode;
 
   UserModel? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _isAuthenticated;
+  String? get errorCode => _errorCode;
 
   // Kiểm tra trạng thái đăng nhập khi mở app
 
@@ -87,5 +90,45 @@ class AuthProvider extends ChangeNotifier {
     _isAuthenticated = false;
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<bool> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final res = await _authService.changePassword(
+          oldPass: oldPassword,
+          newPass: newPassword,
+          confirmPass: confirmPassword);
+      if (res.success) {
+        await _storage.clearAll();
+        _currentUser = null;
+        _isAuthenticated = false;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = res.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      if (e is DioException && e.response?.data is Map) {
+        _errorCode = e.response?.data['code']?.toString();
+      } else {
+        _errorCode = null;
+      }
+      _errorMessage = ApiClient.getErrorMessage(e);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 }

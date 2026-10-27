@@ -34,6 +34,19 @@ class AuthService {
     return apiResponse;
   }
 
+  Future<ApiResponse<void>> changePassword(
+      {required String oldPass,
+      required String newPass,
+      required String confirmPass}) async {
+    final response = await _client.dio.post(ApiConstants.changePassword, data: {
+      "oldPassword": oldPass,
+      "newPassword": newPass,
+      "confirmPassword": confirmPass
+    });
+    return ApiResponse<void>.fromJson(
+        response.data as Map<String, dynamic>, (_) => null);
+  }
+
   Future<ApiResponse<UserModel>> getMyInfo() async {
     final response = await _client.dio.get(ApiConstants.getMyInfo);
 
