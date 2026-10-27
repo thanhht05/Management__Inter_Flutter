@@ -15,6 +15,7 @@ class ApiConstants {
   // Endpoints cho Module Auth
   static const String login = '/auth/login';
   static const String logout = '/auth/logout';
+  static const String refreshToken = '/auth/refresh';
   static const String getMyInfo = '/users/get-my-info';
 
   static const String changePassword = '/users/change-password';

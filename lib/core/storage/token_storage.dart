@@ -24,6 +24,10 @@ class TokenStorage {
     return await _storage.read(key: _keyAccessToken);
   }
 
+  Future<String?> getRefreshToken() async {
+    return await _storage.read(key: _keyRefreshToken);
+  }
+
   Future<bool> hasAccessToken() async {
     final token = await getAccessToken();
     return token != null && token.isNotEmpty;
