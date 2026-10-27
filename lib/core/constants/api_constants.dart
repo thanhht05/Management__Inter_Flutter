@@ -19,4 +19,5 @@ class ApiConstants {
   static const String getMyInfo = '/users/get-my-info';
 
   static const String changePassword = '/users/change-password';
+  static const String interns = '/interns';
 }
