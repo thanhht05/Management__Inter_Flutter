@@ -26,4 +26,6 @@ class ApiConstants {
   static const String positions = '/positions';
   static const String internshipBatches = '/internship-batches';
   static const String mentors = '/users/mentors';
+  static const String departments = '/departments';
+  static String userDetail(String id) => '/users/$id';
 }

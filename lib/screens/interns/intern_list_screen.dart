@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:manage_intern/core/utils/debouncer.dart';
 import 'package:manage_intern/modles/intern_model.dart';
+import 'package:manage_intern/providers/auth_provider.dart';
 import 'package:manage_intern/providers/intern_provider.dart';
 import 'package:manage_intern/screens/interns/intern_detail_screen.dart';
 import 'package:manage_intern/screens/interns/intern_form_screen.dart';
