@@ -78,6 +78,28 @@ class _UserEditDialogState extends State<UserEditDialog> {
     }
   }
 
+  bool get _hasChanges {
+    final u = widget.user;
+    final currentFullName = _fullNameController.text.trim();
+    final currentEmail = _emailController.text.trim();
+    final currentPassword = _passwordController.text.trim();
+    final currentDateOfBirth =
+        _dateOfBirth != null ? _toApiDate(_dateOfBirth!) : null;
+    final originalDateOfBirth =
+        (u.dateOfBirth != null && u.dateOfBirth!.isNotEmpty)
+            ? u.dateOfBirth
+            : null;
+
+    if (currentPassword.isNotEmpty) return true;
+    if (currentFullName != u.fullName.trim()) return true;
+    if (currentEmail != u.email.trim()) return true;
+    if (_departmentId != u.department?.id) return true;
+    if (currentDateOfBirth != originalDateOfBirth) return true;
+    if (_isActive != u.isActive) return true;
+
+    return false;
+  }
+
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
@@ -86,6 +108,19 @@ class _UserEditDialogState extends State<UserEditDialog> {
         const SnackBar(
           content: Text('Vui lòng chọn phòng ban'),
           backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Nếu không có thay đổi nào, đóng dialog và không gọi API
+    if (!_hasChanges) {
+      Navigator.pop(context, false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không có thông tin nào thay đổi'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
         ),
       );
       return;
@@ -183,8 +218,8 @@ class _UserEditDialogState extends State<UserEditDialog> {
                       icon: Icon(_obscurePassword
                           ? Icons.visibility_off
                           : Icons.visibility),
-                      onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                     border: const OutlineInputBorder(),
                   ),
@@ -227,9 +262,8 @@ class _UserEditDialogState extends State<UserEditDialog> {
                   title: const Text('Trạng thái hoạt động'),
                   subtitle: Text(_isActive ? 'Đang hoạt động' : 'Vô hiệu hóa'),
                   value: _isActive,
-                  onChanged: updating
-                      ? null
-                      : (v) => setState(() => _isActive = v),
+                  onChanged:
+                      updating ? null : (v) => setState(() => _isActive = v),
                 ),
               ],
             ),
@@ -256,4 +290,3 @@ class _UserEditDialogState extends State<UserEditDialog> {
     );
   }
 }
-

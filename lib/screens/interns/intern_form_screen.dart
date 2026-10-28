@@ -89,9 +89,41 @@ class _InternFormScreenState extends State<InternFormScreen> {
     });
   }
 
+  bool get _hasChanges {
+    if (!widget.isEditing || widget.intern == null) return true;
+
+    final i = widget.intern!;
+    final currentFullName = _fullNameController.text.trim();
+    final currentStartDate =
+        _startDate != null ? _toApiDate(_startDate!) : null;
+    final currentEndDate = _endDate != null ? _toApiDate(_endDate!) : null;
+
+    if (currentFullName != i.fullName.trim()) return true;
+    if (_positionId != i.position?.id) return true;
+    if (_batchId != i.internshipBatch?.id) return true;
+    if (_mentorId != i.mentor?.id) return true;
+    if (currentStartDate != i.startDate) return true;
+    if (currentEndDate != i.endDate) return true;
+    if (_status != i.internStatus) return true;
+
+    return false;
+  }
+
   Future<void> _submit() async {
     setState(() => _fullNameServerError = null);
     if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    if (widget.isEditing && !_hasChanges) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không có thông tin nào thay đổi'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
 
     final provider = context.read<InternProvider>();
     final bool ok;
