@@ -103,7 +103,6 @@ class ApiClient {
                   extra: {'withCredentials': true},
                   headers: {
                     'Content-Type': 'application/json',
-                    // Gắn header Cookie thủ công (hoạt động tốt trên cả Mobile Android/iOS)
                     if (refreshToken != null)
                       'Cookie': 'REFRESH_TOKEN=$refreshToken',
                   },
