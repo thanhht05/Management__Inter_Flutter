@@ -77,3 +77,37 @@ class LoginDataModel {
     );
   }
 }
+
+class UserUpdateRequest {
+  final String email;
+  final String? password;
+  final String fullName;
+  final String? dateOfBirth; // yyyy-MM-dd
+  final bool isActive;
+  final int departmentId;
+
+  UserUpdateRequest({
+    required this.email,
+    this.password,
+    required this.fullName,
+    this.dateOfBirth,
+    this.isActive = true,
+    required this.departmentId,
+  });
+
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{
+      'email': email.trim(),
+      'fullName': fullName.trim(),
+      'isActive': isActive,
+      'departmentId': departmentId,
+    };
+    if (password != null && password!.trim().isNotEmpty) {
+      map['password'] = password!.trim();
+    }
+    if (dateOfBirth != null && dateOfBirth!.isNotEmpty) {
+      map['dateOfBirth'] = dateOfBirth;
+    }
+    return map;
+  }
+}

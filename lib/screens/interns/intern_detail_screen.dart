@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:manage_intern/modles/intern_model.dart';
 import 'package:manage_intern/providers/intern_provider.dart';
+import 'package:manage_intern/screens/interns/intern_form_screen.dart';
 import 'package:provider/provider.dart';
 
 class InternDetailScreen extends StatefulWidget {
@@ -79,6 +80,19 @@ class _InternDetailScreenState extends State<InternDetailScreen> {
       appBar: AppBar(
         title: const Text('Chi Tiết Thực Tập Sinh'),
         actions: [
+          if (intern != null)
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Chỉnh sửa',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => InternFormScreen(intern: intern),
+                  ),
+                );
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Làm mới',

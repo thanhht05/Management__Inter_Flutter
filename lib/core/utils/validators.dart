@@ -66,4 +66,24 @@ class Validators {
     }
     return null;
   }
+
+  /// Validate định dạng Email
+  static String? validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Vui lòng nhập email';
+    }
+    final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w{2,}$');
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'Email không đúng định dạng';
+    }
+    return null;
+  }
+
+  /// Validate mật khẩu tùy chọn (dùng cho cập nhật tài khoản: nếu để trống thì bỏ qua)
+  static String? validateOptionalPassword(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    return validatePassword(value);
+  }
 }

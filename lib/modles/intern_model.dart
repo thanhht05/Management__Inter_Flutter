@@ -87,6 +87,37 @@ class InternCreationRequest {
       };
 }
 
+class InternUpdateRequest {
+  final String fullName;
+  final int positionId;
+  final String mentorId;
+  final String startDate;
+  final String endDate;
+  final int internshipBatchId;
+  final String internStatus;
+
+  InternUpdateRequest({
+    required this.fullName,
+    required this.positionId,
+    required this.mentorId,
+    required this.startDate,
+    required this.endDate,
+    required this.internshipBatchId,
+    required this.internStatus,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'fullName': fullName.trim(),
+        'positionId': positionId,
+        'mentorId': mentorId,
+        'startDate': startDate,
+        'endDate': endDate,
+        'internshipBatchId': internshipBatchId,
+        'internShipBatchId': internshipBatchId,
+        'internStatus': internStatus,
+      };
+}
+
 class InternModel {
   final int id;
   final String fullName;

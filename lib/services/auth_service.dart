@@ -61,7 +61,6 @@ class AuthService {
       await _client.dio.post(ApiConstants.logout);
     } catch (_) {
     } finally {
-      _client.clearCache();
       await _storage.clearAll();
     }
   }

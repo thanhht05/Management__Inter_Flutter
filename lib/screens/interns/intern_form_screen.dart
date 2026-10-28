@@ -4,7 +4,11 @@ import 'package:manage_intern/providers/intern_provider.dart';
 import 'package:provider/provider.dart';
 
 class InternFormScreen extends StatefulWidget {
-  const InternFormScreen({super.key});
+  final InternModel? intern;
+
+  const InternFormScreen({super.key, this.intern});
+
+  bool get isEditing => intern != null;
 
   @override
   State<InternFormScreen> createState() => _InternFormScreenState();
@@ -19,12 +23,23 @@ class _InternFormScreenState extends State<InternFormScreen> {
   String? _mentorId;
   DateTime? _startDate;
   DateTime? _endDate;
+  String _status = 'ACTIVE';
 
   String? _fullNameServerError;
 
   @override
   void initState() {
     super.initState();
+    if (widget.intern != null) {
+      final intern = widget.intern!;
+      _fullNameController.text = intern.fullName;
+      _positionId = intern.position?.id;
+      _batchId = intern.internshipBatch?.id;
+      _mentorId = intern.mentor?.id;
+      _startDate = _tryParse(intern.startDate);
+      _endDate = _tryParse(intern.endDate);
+      _status = intern.internStatus.isNotEmpty ? intern.internStatus : 'ACTIVE';
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<InternProvider>().loadFormMasterData();
     });
@@ -79,21 +94,39 @@ class _InternFormScreenState extends State<InternFormScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final provider = context.read<InternProvider>();
-    final ok = await provider.createIntern(InternCreationRequest(
-      fullName: _fullNameController.text,
-      positionId: _positionId!,
-      mentorId: _mentorId!,
-      startDate: _toApiDate(_startDate!),
-      endDate: _toApiDate(_endDate!),
-      internshipBatchId: _batchId!,
-    ));
+    final bool ok;
+    if (widget.isEditing) {
+      ok = await provider.updateIntern(
+        widget.intern!.id,
+        InternUpdateRequest(
+          fullName: _fullNameController.text,
+          positionId: _positionId!,
+          mentorId: _mentorId!,
+          startDate: _toApiDate(_startDate!),
+          endDate: _toApiDate(_endDate!),
+          internshipBatchId: _batchId!,
+          internStatus: _status,
+        ),
+      );
+    } else {
+      ok = await provider.createIntern(InternCreationRequest(
+        fullName: _fullNameController.text,
+        positionId: _positionId!,
+        mentorId: _mentorId!,
+        startDate: _toApiDate(_startDate!),
+        endDate: _toApiDate(_endDate!),
+        internshipBatchId: _batchId!,
+      ));
+    }
 
     if (!mounted) return;
     if (ok) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Thêm thực tập sinh thành công'),
+        SnackBar(
+          content: Text(widget.isEditing
+              ? 'Cập nhật thực tập sinh thành công'
+              : 'Thêm thực tập sinh thành công'),
           backgroundColor: Colors.green,
         ),
       );
@@ -133,7 +166,11 @@ class _InternFormScreenState extends State<InternFormScreen> {
     final provider = context.watch<InternProvider>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Thêm Thực Tập Sinh')),
+      appBar: AppBar(
+        title: Text(widget.isEditing
+            ? 'Chỉnh Sửa Thực Tập Sinh'
+            : 'Thêm Thực Tập Sinh'),
+      ),
       body: _buildBody(provider),
     );
   }
@@ -271,6 +308,39 @@ class _InternFormScreenState extends State<InternFormScreen> {
                 return null;
               },
             ),
+            if (widget.isEditing) ...[
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _status,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  labelText: 'Trạng thái thực tập',
+                  prefixIcon: Icon(Icons.flag_outlined),
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'ACTIVE',
+                    child: Text('Đang thực tập (ACTIVE)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'COMPLETED',
+                    child: Text('Hoàn thành (COMPLETED)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'WARNING',
+                    child: Text('Cảnh báo (WARNING)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'DROPPED',
+                    child: Text('Ngừng thực tập (DROPPED)'),
+                  ),
+                ],
+                onChanged: (v) {
+                  if (v != null) setState(() => _status = v);
+                },
+              ),
+            ],
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: submitting ? null : _submit,
@@ -281,7 +351,9 @@ class _InternFormScreenState extends State<InternFormScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.save),
-              label: Text(submitting ? 'Đang lưu...' : 'Tạo mới'),
+              label: Text(submitting
+                  ? 'Đang lưu...'
+                  : (widget.isEditing ? 'Lưu thay đổi' : 'Tạo mới')),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),

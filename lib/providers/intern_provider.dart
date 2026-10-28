@@ -183,13 +183,44 @@ class InternProvider extends ChangeNotifier {
     try {
       final res = await _internService.createIntern(request);
       if (res.success) {
-        ApiClient.instance.clearCache(); // dữ liệu server đã đổi -> bỏ ETag cũ
         _isSubmitting = false;
         notifyListeners();
         await fetchInterns(refresh: true);
         return true;
       }
       _submitError = res.message ?? 'Tạo thực tập sinh thất bại';
+      _submitErrorCode = res.code;
+      return false;
+    } catch (e) {
+      if (e is DioException && e.response?.data is Map) {
+        _submitErrorCode = e.response?.data['code']?.toString();
+      }
+      _submitError = ApiClient.getErrorMessage(e);
+      return false;
+    } finally {
+      _isSubmitting = false;
+      notifyListeners();
+    }
+  }
+
+  // Cập nhật thực tập sinh. Trả về true nếu thành công.
+  Future<bool> updateIntern(int id, InternUpdateRequest request) async {
+    _isSubmitting = true;
+    _submitError = null;
+    _submitErrorCode = null;
+    notifyListeners();
+    try {
+      final res = await _internService.updateIntern(id, request);
+      if (res.success) {
+        if (_selectedIntern?.id == id && res.data != null) {
+          _selectedIntern = res.data;
+        }
+        _isSubmitting = false;
+        notifyListeners();
+        await fetchInterns(refresh: true);
+        return true;
+      }
+      _submitError = res.message ?? 'Cập nhật thực tập sinh thất bại';
       _submitErrorCode = res.code;
       return false;
     } catch (e) {

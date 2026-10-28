@@ -10,10 +10,6 @@ class ApiClient {
   static final ApiClient instance = ApiClient._();
 
   late final Dio dio = _createDio();
-  // Lưu ETag theo URL (chỉ áp dụng cho GET request)
-  final Map<String, _EtagCacheEntry> _etagCache = {};
-  // Xóa cache khi logout
-  void clearCache() => _etagCache.clear();
 
   Dio _createDio() {
     final dio = Dio(
@@ -44,47 +40,10 @@ class ApiClient {
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
-
-          // Nếu là GET và đã có ETag trong cache -> Gửi kèm If-None-Match
-          if (options.method.toUpperCase() == 'GET') {
-            final cacheKey = options.uri.toString();
-            final cached = _etagCache[cacheKey];
-            if (cached != null) {
-              options.headers['If-None-Match'] = cached.etag;
-            }
-          }
-
           return handler.next(options);
-        },
-        onResponse: (response, handler) {
-          // Nếu GET trả về 200 kèm header ETag -> Lưu vào cache
-          if (response.requestOptions.method.toUpperCase() == 'GET' &&
-              response.statusCode == 200) {
-            final etag = response.headers.value('etag');
-            if (etag != null && etag.isNotEmpty) {
-              final cacheKey = response.requestOptions.uri.toString();
-              _etagCache[cacheKey] = _EtagCacheEntry(
-                etag: etag,
-                data: response.data,
-              );
-            }
-          }
-          return handler.next(response);
         },
         onError: (DioException error, handler) async {
           final statusCode = error.response?.statusCode;
-
-          // 1. Xử lý khi Server trả về 304 Not Modified (Dữ liệu không đổi)
-          if (statusCode == 304 &&
-              error.requestOptions.method.toUpperCase() == 'GET') {
-            final cacheKey = error.requestOptions.uri.toString();
-            final cached = _etagCache[cacheKey];
-            if (cached != null && error.response != null) {
-              error.response!.data = cached.data;
-              error.response!.statusCode = 200;
-              return handler.resolve(error.response!);
-            }
-          }
 
           // 2. Xử lý khi bị 401 Unauthorized (Refresh Token)
           final isUnauthorized = statusCode == 401;

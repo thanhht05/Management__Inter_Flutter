@@ -54,6 +54,18 @@ class InternService {
     );
   }
 
+  Future<ApiResponse<InternModel>> updateIntern(
+      int id, InternUpdateRequest request) async {
+    final response = await _client.dio.put(
+      ApiConstants.internDetail(id),
+      data: request.toJson(),
+    );
+    return ApiResponse<InternModel>.fromJson(
+      response.data as Map<String, dynamic>,
+      (dataJson) => InternModel.fromJson(dataJson as Map<String, dynamic>),
+    );
+  }
+
   // Lấy danh sách items từ data (hỗ trợ cả dạng List thuần và PageResponse)
   List<Map<String, dynamic>> _extractItems(dynamic body) {
     final data = (body as Map<String, dynamic>)['data'];
