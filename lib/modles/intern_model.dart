@@ -17,13 +17,27 @@ class PositionSummaryModel {
 class InternshipBatchSummaryModel {
   final int id;
   final String name;
-  InternshipBatchSummaryModel({required this.id, required this.name});
+  final String? startDate;
+  final String? endDate;
+  final String? status;
+
+  InternshipBatchSummaryModel({
+    required this.id,
+    required this.name,
+    this.startDate,
+    this.endDate,
+    this.status,
+  });
+
   factory InternshipBatchSummaryModel.fromJson(Map<String, dynamic> json) {
     return InternshipBatchSummaryModel(
       id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id'].toString()) ?? 0,
       name: json['name'] ?? '',
+      startDate: json['startDate']?.toString(),
+      endDate: json['endDate']?.toString(),
+      status: json['status']?.toString(),
     );
   }
 }
@@ -44,6 +58,33 @@ class MentorSummaryModel {
       email: json['email'] ?? '',
     );
   }
+}
+
+class InternCreationRequest {
+  final String fullName;
+  final int positionId;
+  final String mentorId;
+  final String startDate; // yyyy-MM-dd
+  final String endDate; // yyyy-MM-dd
+  final int internshipBatchId;
+
+  InternCreationRequest({
+    required this.fullName,
+    required this.positionId,
+    required this.mentorId,
+    required this.startDate,
+    required this.endDate,
+    required this.internshipBatchId,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'fullName': fullName.trim(),
+        'positionId': positionId,
+        'mentorId': mentorId,
+        'startDate': startDate,
+        'endDate': endDate,
+        'internshipBatchId': internshipBatchId,
+      };
 }
 
 class InternModel {

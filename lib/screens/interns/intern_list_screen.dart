@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:manage_intern/core/utils/debouncer.dart';
 import 'package:manage_intern/modles/intern_model.dart';
 import 'package:manage_intern/providers/intern_provider.dart';
+import 'package:manage_intern/screens/interns/intern_detail_screen.dart';
+import 'package:manage_intern/screens/interns/intern_form_screen.dart';
 import 'package:provider/provider.dart';
 
 class InternListScreen extends StatefulWidget {
@@ -13,6 +16,7 @@ class InternListScreen extends StatefulWidget {
 class _InternListScreenState extends State<InternListScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final Debouncer _searchDebouncer = Debouncer();
 
   final List<Map<String, String?>> _statusOptions = [
     {'label': 'Tất cả', 'value': null},
@@ -38,6 +42,7 @@ class _InternListScreenState extends State<InternListScreen> {
 
   @override
   void dispose() {
+    _searchDebouncer.cancel();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -73,6 +78,14 @@ class _InternListScreenState extends State<InternListScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const InternFormScreen()),
+        ),
+        icon: const Icon(Icons.person_add_alt_1),
+        label: const Text('Thêm mới'),
+      ),
       body: Column(
         children: [
           // Thanh tìm kiếm
@@ -80,7 +93,15 @@ class _InternListScreenState extends State<InternListScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
             child: TextField(
               controller: _searchController,
-              onSubmitted: (val) => provider.setKeyword(val),
+              onChanged: (val) {
+                setState(() {});
+                _searchDebouncer
+                    .run(() => context.read<InternProvider>().setKeyword(val));
+              },
+              onSubmitted: (val) {
+                _searchDebouncer.cancel();
+                provider.setKeyword(val);
+              },
               decoration: InputDecoration(
                 hintText: 'Tìm kiếm theo họ tên...',
                 prefixIcon: const Icon(Icons.search),
@@ -88,6 +109,7 @@ class _InternListScreenState extends State<InternListScreen> {
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
+                          _searchDebouncer.cancel();
                           _searchController.clear();
                           provider.setKeyword("");
                           setState(() {});
@@ -99,7 +121,6 @@ class _InternListScreenState extends State<InternListScreen> {
                 ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               ),
-              onChanged: (_) => setState(() {}),
             ),
           ),
           // Bộ lọc trạng thái (Filter Chips)
@@ -201,6 +222,17 @@ class _InternListScreenState extends State<InternListScreen> {
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => InternDetailScreen(
+                      internId: intern.id,
+                      initialIntern: intern,
+                    ),
+                  ),
+                );
+              },
               leading: CircleAvatar(
                 backgroundColor: statusColor.withAlpha(38),
                 child: Text(
@@ -226,14 +258,12 @@ class _InternListScreenState extends State<InternListScreen> {
                   if (intern.startDate != null || intern.endDate != null)
                     Text(
                       'Thời gian: ${intern.startDate ?? "?"} → ${intern.endDate ?? "?"}',
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.grey),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                 ],
               ),
               trailing: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: statusColor.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),

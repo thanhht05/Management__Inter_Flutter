@@ -20,4 +20,10 @@ class ApiConstants {
 
   static const String changePassword = '/users/change-password';
   static const String interns = '/interns';
+  static String internDetail(int id) => '/interns/$id';
+
+  // Endpoints Master Data (Dropdown tạo/sửa Intern)
+  static const String positions = '/positions';
+  static const String internshipBatches = '/internship-batches';
+  static const String mentors = '/users/mentors';
 }
