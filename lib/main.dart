@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:manage_intern/providers/auth_provider.dart';
 import 'package:manage_intern/providers/intern_provider.dart';
+import 'package:manage_intern/providers/mentor_provider.dart';
 import 'package:manage_intern/screens/auth/login_screen.dart';
-import 'package:manage_intern/screens/interns/intern_list_screen.dart';
+import 'package:manage_intern/screens/home/main_navigation_screen.dart';
 import 'package:manage_intern/screens/profile/profile_screen.dart';
 import 'package:manage_intern/screens/splash/splash_screen.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => InternProvider()),
+        ChangeNotifierProvider(create: (_) => MentorProvider()),
       ],
       child: MaterialApp(
         title: 'Manage Intern',
@@ -35,7 +37,9 @@ class MyApp extends StatelessWidget {
           "/": (context) => const SplashScreen(),
           "/login": (context) => const LoginScreen(),
           "/profile": (context) => const ProfileScreen(),
-          "/interns": (context) => const InternListScreen(),
+          "/home": (context) => const MainNavigationScreen(),
+          "/interns": (context) => const MainNavigationScreen(initialIndex: 0),
+          "/mentors": (context) => const MainNavigationScreen(initialIndex: 1),
         },
       ),
     );

@@ -134,6 +134,21 @@ class ProfileScreen extends StatelessWidget {
                       title: const Text('Số thực tập sinh phụ trách'),
                       subtitle: Text('${user.internCount} bạn'),
                     ),
+                  if (user.role?.roleName == 'ADMIN') ...[
+                    const Divider(),
+                    ListTile(
+                      leading: const Icon(Icons.supervisor_account_outlined,
+                          color: Colors.blue),
+                      title: const Text(
+                        'Quản lý người hướng dẫn (Mentors)',
+                        style: TextStyle(
+                            color: Colors.blue, fontWeight: FontWeight.w600),
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios,
+                          size: 16, color: Colors.blue),
+                      onTap: () => Navigator.pushNamed(context, '/mentors'),
+                    ),
+                  ],
                 ],
               ),
             ),
